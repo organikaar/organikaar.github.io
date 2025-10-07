@@ -219,7 +219,115 @@ document.getElementById('orderForm').addEventListener('submit', async function(e
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
 
   <script>
-  /*************************************************
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyA9aDxxxxx",
+    authDomain: "organicar-shop.firebaseapp.com",
+    projectId: "organicar-shop",
+    storageBucket: "organicar-shop.appspot.com",
+    messagingSenderId: "709123456789",
+    appId: "1:709123456789:web:abc123xyz"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+</script>
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<div id="cart">
+  <h3>سبد خرید شما</h3>
+  <ul id="cartItems"></ul>
+  <p>جمع کل: <span id="total">0</span> تومان</p>
+</div>
+
+<form id="orderForm">
+  <input type="text" name="name" placeholder="نام کامل" required />
+  <input type="tel" name="phone" placeholder="تلفن" required />
+  <input type="text" name="address" placeholder="آدرس" required />
+  <input type="text" name="postalCode" placeholder="کدپستی" />
+  <button type="submit">ثبت سفارش</button>
+</form>
+
+<div id="thankYou" style="display:none;">
+  <h2>سپاس از سفارش شما!</h2>
+  <p id="tracking"></p>
+  <p>اطلاعات سفارش شما ثبت شد و در اسرع وقت پردازش خواهد شد.</p>
+</div>
+
+<script>
+  // 🔹 1. پیکربندی Firebase
+  const firebaseConfig = {
+    apiKey: "API_KEY",
+    authDomain: "PROJECT_ID.firebaseapp.com",
+    projectId: "PROJECT_ID",
+    storageBucket: "PROJECT_ID.appspot.com",
+    messagingSenderId: "SENDER_ID",
+    appId: "APP_ID"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+
+  // 🔹 2. سبد خرید نمونه
+  let cart = [
+    {name:'زعفران 1 گرمی', price:200000, qty:1},
+    {name:'زرشک 500 گرمی', price:150000, qty:2}
+  ];
+
+  function renderCart() {
+    const ul = document.getElementById('cartItems');
+    ul.innerHTML = '';
+    let total = 0;
+    cart.forEach(item => {
+      const li = document.createElement('li');
+      li.textContent = `${item.name} × ${item.qty} : ${item.price * item.qty} تومان`;
+      ul.appendChild(li);
+      total += item.price * item.qty;
+    });
+    document.getElementById('total').textContent = total;
+  }
+  renderCart();
+
+  // 🔹 3. ثبت سفارش در Firestore
+  document.getElementById('orderForm').addEventListener('submit', async function(e){
+    e.preventDefault();
+    const form = e.target;
+    const total = cart.reduce((sum, item) => sum + item.price*item.qty,0);
+
+    // ساخت شماره پیگیری شامل تاریخ YYYYMM-DDDD
+    const now = new Date();
+    const date = now.getFullYear().toString() + (now.getMonth()+1).toString().padStart(2,'0');
+    const randomId = Math.floor(1000 + Math.random()*9000); // 4 رقم تصادفی
+    const trackingCode = `ORD-${date}-${randomId}`;
+
+    const orderData = {
+      name: form.name.value,
+      phone: form.phone.value,
+      address: form.address.value,
+      postalCode: form.postalCode.value,
+      items: cart,
+      total: total,
+      trackingCode: trackingCode,
+      createdAt: firebase.firestore.Timestamp.now()
+    };
+
+    try {
+      await db.collection('orders').doc(trackingCode).set(orderData);
+      document.getElementById('orderForm').style.display='none';
+      document.getElementById('cart').style.display='none';
+      document.getElementById('thankYou').style.display='block';
+      document.getElementById('tracking').textContent = 'کد پیگیری شما: '+trackingCode;
+    } catch(err) {
+      alert('خطا در ثبت سفارش: ' + err.message);
+    }
+  });
+</script>
+
+    /*************************************************
    * تنظیمات اولیه و محصولات
    *************************************************/
   const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbzlcDBrsB9GxtyGrfE9wCwudTZbgfGO0UIA8M_v3yZ84wevwpKlghRxIIE5Bj7TYdzt/exec'; // -> جایگزین کن اگر Google Sheets می‌خوای
@@ -516,6 +624,7 @@ document.getElementById('orderForm').addEventListener('submit', async function(e
   </script>
 </body>
 </html>
+
 
 
 
