@@ -1,5 +1,5 @@
 const SHEET_NAME = 'Orders'; // نام شیت
-const SECRET = 'CHANGE_TO_YOUR_SECRET'; // با BACKEND_SECRET در صفحه یکی کن
+const SECRET = 'Qaz@123123'; // با BACKEND_SECRET در صفحه یکی کن
 
 function doPost(e){
   try{
