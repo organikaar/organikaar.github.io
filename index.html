@@ -108,7 +108,41 @@
     </section>
 
     <!-- فرم اطلاعات مشتری -->
-    <<form id="orderForm" method="POST" action="https://script.google.com/macros/s/AKfycbzlcDBrsB9GxtyGrfE9wCwudTZbgfGO0UIA8M_v3yZ84wevwpKlghRxIIE5Bj7TYdzt/exec?secret=Qaz@123123">
+    <form id="orderForm" method="POST" action="https://script.google.com/macros/s/AKfycbzlcDBrsB9GxtyGrfE9wCwudTZbgfGO0UIA8M_v3yZ84wevwpKlghRxIIE5Bj7TYdzt/exec?secret=Qaz@123123">
+  <input type="text" name="name" placeholder="نام کامل" required />
+  <input type="tel" name="phone" placeholder="تلفن" required />
+  <input type="text" name="address" placeholder="آدرس" required />
+  <input type="text" name="postalCode" placeholder="کدپستی" />
+  <textarea name="items" placeholder="اقلام سفارش" required></textarea>
+  <input type="number" name="total" placeholder="جمع کل (تومان)" required />
+  <button type="submit">ثبت سفارش</button>
+</form>
+
+<script>
+document.getElementById('orderForm').addEventListener('submit', async function(e){
+  e.preventDefault();
+
+  const form = e.target;
+  const data = {
+    name: form.name.value,
+    phone: form.phone.value,
+    address: form.address.value,
+    postalCode: form.postalCode.value,
+    items: form.items.value,
+    total: form.total.value
+  };
+
+  const response = await fetch(form.action, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  });
+
+  const result = await response.json();
+  alert(result.message + (result.trackingCode ? '\nکد پیگیری: ' + result.trackingCode : ''));
+  if(result.status === 'success') form.reset();
+});
+</script>
 
       <div class="form-row">
         <div class="field">
@@ -482,6 +516,7 @@
   </script>
 </body>
 </html>
+
 
 
 
