@@ -397,8 +397,15 @@
    *************************************************/
 async function sendInvoiceToBackend(isFinal = true) {
   const form = getFormValues();
+  console.log("Form values:", form);
+  console.log("Cart:", cart);
 
-  // ساخت payload دقیق مطابق با ستون‌های شیت
+  // اگر چیزی پر نشده بود، خطا بده
+  if (!form.fullname || !form.mobile || Object.keys(cart).length === 0) {
+    console.warn("فرم ناقص است یا سبد خالی است، ذخیره انجام نشد.");
+    return;
+  }
+
   const data = {
     date: new Date().toLocaleString('fa-IR'),
     trackingId: trackingId,
@@ -416,17 +423,19 @@ async function sendInvoiceToBackend(isFinal = true) {
     }, 0)
   };
 
+  console.log("Payload sending to SheetDB:", data);
+
   try {
     const resp = await fetch(BACKEND_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ data }) // SheetDB expects { "data": { ... } }
+      body: JSON.stringify({ data })
     });
 
     const result = await resp.json();
     console.log('SheetDB response:', result);
     if (resp.ok) {
-      console.log('✅ همه اطلاعات سفارش در Google Sheet ذخیره شد.');
+      console.log('✅ سفارش با موفقیت در Google Sheet ذخیره شد.');
     } else {
       console.warn('❌ خطا در ذخیره سفارش:', result);
     }
