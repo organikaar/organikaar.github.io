@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>فرم سفارش - ارگانیکار</title>
+  <title>سفارش محصول ارگانیکار</title>
 
   <!-- Fonts: اگر فایل فونت محلی داری، @font-face اضافه کن -->
   <style>
@@ -81,8 +81,8 @@
   <div class="wrap">
     <header>
       <img src="image/logo.png" alt="logo">
-      <h1>فروشگاه محصولات ارگانیک ارگانیکار</h1>
-      <p>طبیعت، در خالص‌ترین شکلش در ارگانیکار 🌿</p>
+      <h1>محصولات طبیعی ارگانیکار</h1>
+      <p>طبیعت، در خالص‌ترین شکلش با ارگانیکار 🌿</p>
     </header>
 
     <!-- محصولات -->
@@ -135,7 +135,7 @@
 
         <div class="field">
           <label for="note">توضیحات سفارش (اختیاری)</label>
-          <textarea id="note" name="note" placeholder="مثلاً زمان تحویل موردنظر"></textarea>
+          <textarea id="note" name="note" placeholder="توضیحات :"></textarea>
         </div>
       </div>
 
@@ -167,7 +167,7 @@
 
         <div style="margin-top:12px">
           <div><strong>کد پیگیری:</strong> <span id="fvTracking"></span></div>
-          <div style="margin-top:6px"><strong>شماره کارت جهت واریز:</strong> <span id="cardNumber">6789-2345-9071-4037</span></div>
+          <div style="margin-top:6px"><strong>شماره کارت جهت واریز:</strong> <span id="cardNumber">6063731177742195</span></div>
           <p style="margin-top:10px">لطفا پس از واریز مبلغ فاکتور، عکس فیش واریزی را دایرکت ارسال نمایید. با تشکر.</p>
         </div>
 
@@ -192,10 +192,18 @@
 
   // لیست محصولات: برای اضافه کردن محصول، یک آیتم جدید به این آرایه اضافه کن
   const PRODUCTS = [
-    { id: "zaferan", title: "زعفران", price: 250000, image: "image/zaferan.jpg", unit: "یک بسته" },
-    { id: "zereshk", title: "زرشک", price: 120000, image: "image/zereshk.jpg", unit: "یک بسته" },
-    { id: "anab", title: "عناب", price: 100000, image: "image/anab.jpg", unit: "یک بسته" },
-    { id: "asal", title: "عسل", price: 180000, image: "image/asal.jpg", unit: "یک شیشه" }
+    { id: "zaferan", title: "زعفران نگین قهستان", price: 670000, image: "image/zaferan.jpg", unit: "یک مثقالی " },
+     { id: "zaferan1", title: " زعفران نگین قهستان", price: 335000, image: "image/zaferan1.jpg", unit: "نیم مثقالی " },
+     { id: "zaferan2", title: "زعفران سرگل قهستان", price: 600000, image: "image/zaferan2.jpg", unit: "یک مثقالی " },
+     { id: "zaferan3", title: "زعفران سرگل قهستان", price: 300000, image: "image/zaferan3.jpg", unit: "نیم مثقالی " },
+     { id: "zaferan4", title: "زعفران دسته قهستان", price: 510000, image: "image/zaferan4.jpg", unit: "یک مثقالی" },
+     { id: "zaferan5", title: "زعفران دسته قهستان", price: 255000, image: "image/zaferan5.jpg", unit: "نیم مثقالی " },
+    { id: "zereshk", title: "زرشک پفکی اعلاء", price: 694000, image: "image/zereshk.jpg", unit: "یک کیلویی" },
+    { id: "zereshk1", title: "زرشک پفکی اعلاء", price: 347000, image: "image/zereshk1.jpg", unit: "نیم کیلویی" },
+    { id: "anab", title: "عناب اعلاء بیرجند", price: 560000, image: "image/anab.jpg", unit: "یک کیلویی" },
+    { id: "anab1", title: "عناب اعلاء بیرجند", price: 280000, image: "image/anab1.jpg", unit: "نیم کیلویی" },
+    { id: "asal", title: "عسل درجه1", price: 890000, image: "image/asal.jpg", unit: "یک کیلویی" }
+      { id: "asal1", title: "عسل درجه1", price: 450000, image: "image/asal1.jpg", unit: "نیم کیلویی" }
   ];
 
   // وضعیت سبد
