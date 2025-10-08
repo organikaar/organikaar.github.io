@@ -395,36 +395,42 @@
    * ارسال یا آپدیت فاکتور به backend (Google Sheets)
    * behavior: در اولین ارسال append یا insert می‌کند، در ارسال‌های بعدی (با همان trackingId) آپدیت می‌کند
    *************************************************/
-  async function sendInvoiceToBackend(isFinal=true){
-    if(!BACKEND_URL || BACKEND_URL.includes("PASTE_YOUR_APPS_SCRIPT_URL_HERE")) {
-      console.warn("BACKEND_URL تنظیم نشده. برای ذخیره در Google Sheets، URL اسکریپت را قرار بده.");
-      return;
+async function sendInvoiceToBackend(isFinal = true) {
+  const form = getFormValues();
+
+  // ساخت payload مخصوص SheetDB
+  const data = {
+    date: new Date().toLocaleString('fa-IR'),
+    trackingId,
+    fullname: form.fullname,
+    mobile: form.mobile,
+    address: form.address,
+    postal: form.postal,
+    items: JSON.stringify(cart),
+    total: Object.keys(cart).reduce((sum, pid) => {
+      const p = PRODUCTS.find(x => x.id === pid);
+      return sum + (p.price * cart[pid]);
+    }, 0)
+  };
+
+  try {
+    const resp = await fetch(BACKEND_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ data }) // ← این ساختار لازم SheetDB است
+    });
+
+    const result = await resp.json();
+    console.log('SheetDB response:', result);
+    if (resp.ok) {
+      console.log('✅ سفارش با موفقیت در Google Sheet ذخیره شد.');
+    } else {
+      console.warn('❌ خطا در ذخیره سفارش:', result);
     }
-    const payload = {
-      secret: BACKEND_SECRET,
-      trackingId,
-      timestamp: new Date().toISOString(),
-      final: isFinal,
-      cart,
-      form: getFormValues()
-    };
-    try{
-      const resp = await fetch(BACKEND_URL, {
-        method: 'POST',
-        headers: {'Content-Type':'application/json'},
-        body: JSON.stringify(payload)
-      });
-      const data = await resp.json();
-      console.log('backend response', data);
-      if(data && data.success) {
-        console.log('Saved to backend');
-      } else {
-        console.warn('backend did not confirm success', data);
-      }
-    }catch(err){
-      console.error('sendInvoiceToBackend error', err);
-    }
+  } catch (err) {
+    console.error('sendInvoiceToBackend error', err);
   }
+}
 
   /*************************************************
    * دکمه‌ها در مودال
