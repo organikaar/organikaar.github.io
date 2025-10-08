@@ -1,220 +1,357 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>فرم سفارش - ارگانیکار</title>
+<style>
+body { font-family: "IRAN-Sans", "Tahoma", sans-serif; background:#f6fbf6; margin:0; color:#104431; }
+:root{--green:#0f6b52;--accent:#0c6a4e;--cream:#ffffff;--muted:#9aaea3;--card-shadow:0 6px 18px rgba(15,107,82,0.08);--radius:14px;}
+.wrap{max-width:1100px;margin:28px auto;padding:18px;}
+header{display:flex;flex-direction:column;align-items:center;gap:8px;padding:14px;border-radius:12px 12px 8px 8px;background:linear-gradient(180deg,var(--green),#0e6a48);color:white}
+header img{width:84px;height:84px;border-radius:50%;object-fit:cover;border:3px solid rgba(255,255,255,0.12)}
+header h1{margin:0;font-size:20px;letter-spacing:0.6px}
+header p{margin:0;font-size:14px;opacity:0.95}
+.products{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:26px}
+.card{background:var(--cream);border-radius:12px;padding:14px;box-shadow:var(--card-shadow);display:flex;flex-direction:column;align-items:center;transition:transform .18s ease, box-shadow .18s ease}
+.card:hover{transform:translateY(-6px);box-shadow:0 18px 30px rgba(15,107,82,0.12)}
+.card img{width:120px;height:120px;object-fit:cover;border-radius:10px;border:1px solid #eee}
+.card .title{margin-top:10px;font-weight:700}
+.card .desc{font-size:13px;color:var(--muted);margin-top:6px;text-align:center;min-height:36px}
+.price{margin-top:8px;font-weight:800;color:var(--green)}
+.qty{display:flex;align-items:center;gap:8px;margin-top:10px}
+.btn-circle{width:34px;height:34px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;border:none;background:var(--green);color:white;font-weight:700;cursor:pointer}
+.qty .num{min-width:34px;text-align:center;font-weight:700}
+.invoice-card{margin-top:28px;background:var(--cream);border-radius:14px;padding:18px;border:2px solid rgba(15,107,82,0.08);box-shadow:var(--card-shadow)}
+.invoice-card h3{text-align:center;margin:8px 0 18px}
+table{width:100%;border-collapse:collapse}
+table th, table td{padding:8px;border:1px solid #e6f0ea;text-align:center}
+table th{background:var(--green);color:white}
+.summary{display:flex;justify-content:space-between;margin-top:12px;font-weight:800}
+form{margin-top:26px;background:#fff;border-radius:12px;padding:18px;box-shadow:var(--card-shadow)}
+.form-row{display:flex;gap:12px;flex-wrap:wrap}
+.field{flex:1;min-width:220px;display:flex;flex-direction:column;margin-bottom:12px}
+.field label{font-size:13px;margin-bottom:6px;color:#28583f}
+.field input, .field textarea{padding:10px;border-radius:8px;border:1px solid #dfeee6;background:#fbfffb}
+textarea{min-height:90px;resize:vertical}
+.error{color:#b83b3b;font-size:13px;margin-top:6px;display:none}
+.cta-row{display:flex;gap:12px;justify-content:center;margin-top:18px}
+.btn{background:var(--green);color:white;padding:12px 18px;border-radius:10px;border:none;cursor:pointer;font-weight:800;box-shadow:0 6px 14px rgba(15,107,82,0.12)}
+.btn.secondary{background:transparent;border:2px solid var(--green);color:var(--green);font-weight:700}
+.overlay{position:fixed;inset:0;background:rgba(6,12,8,0.45);display:none;align-items:center;justify-content:center;padding:20px;z-index:1200}
+.modal{background:white;border-radius:12px;padding:18px;max-width:900px;width:100%;max-height:90vh;overflow:auto}
+.modal .top{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.small-muted{font-size:13px;color:#7b8f86}
+@media (max-width:900px){ .products{grid-template-columns:repeat(2,1fr)} }
+@media (max-width:600px){ .products{grid-template-columns:1fr;gap:12px}.form-row{flex-direction:column}header img{width:68px;height:68px}}
+.tiny{font-size:12px;padding:8px 10px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<img src="image/logo.png" alt="logo">
+<h1>فروشگاه محصولات ارگانیک ارگانیکار</h1>
+<p>طبیعت، در خالص‌ترین شکلش در ارگانیکار 🌿</p>
+</header>
+
+<section id="products" class="products" aria-label="انتخاب محصولات"></section>
+
+<section class="invoice-card" aria-label="فاکتور خرید">
+<h3>فاکتور خرید</h3>
+<div id="invoice-area">
+<table id="invoice-table" aria-live="polite">
+<thead>
+<tr><th>محصول</th><th>تعداد</th><th>قیمت واحد (تومان)</th><th>مجموع (تومان)</th></tr>
+</thead>
+<tbody></tbody>
+</table>
+<div class="summary">
+<div>کد پیگیری: <span id="trackingDisplay">—</span></div>
+<div>جمع کل: <span id="totalDisplay">0</span> تومان</div>
+</div>
+</div>
+</section>
+
+<form id="customerForm" novalidate>
+<div class="form-row">
+<div class="field">
+<label for="fullname">نام و نام خانوادگی</label>
+<input id="fullname" name="fullname" type="text" placeholder="مثال: میثم رضایی" required>
+<div class="error" id="err-fullname">نام معتبر وارد کنید (فارسی، حداقل دو حرف)</div>
+</div>
+<div class="field">
+<label for="mobile">شماره همراه</label>
+<input id="mobile" name="mobile" type="tel" placeholder="09xxxxxxxxx" required>
+<div class="error" id="err-mobile">شماره همراه معتبر وارد کنید (مثال: 0912xxxxxxx)</div>
+</div>
+<div class="field" style="flex-basis:100%">
+<label for="address">آدرس کامل</label>
+<textarea id="address" name="address" placeholder="آدرس پستی، استان، شهر، خیابان، پلاک..." required></textarea>
+<div class="error" id="err-address">آدرس را کامل وارد کنید (حداقل ۱۰ کاراکتر)</div>
+</div>
+<div class="field">
+<label for="postal">کد پستی</label>
+<input id="postal" name="postal" type="text" placeholder="۱۰ رقم" required>
+<div class="error" id="err-postal">کدپستی معتبر (۱۰ رقم) وارد کنید</div>
+</div>
+<div class="field">
+<label for="note">توضیحات سفارش (اختیاری)</label>
+<textarea id="note" name="note" placeholder="مثلاً زمان تحویل موردنظر"></textarea>
+</div>
+</div>
+<div class="cta-row">
+<button type="button" id="confirmBtn" class="btn">تایید نهایی</button>
+<a href="https://instagram.com/organikaar" target="_blank" rel="noopener" class="btn secondary">بازگشت به صفحه اصلی (@organikaar)</a>
+</div>
+</form>
+</div>
+
+<div class="overlay" id="overlay">
+<div class="modal" role="dialog" aria-modal="true" aria-labelledby="finalTitle">
+<div class="top">
+<h2 id="finalTitle">پیش‌فاکتور / فاکتور نهایی</h2>
+<div><button id="closePreview" class="btn secondary tiny">بستن</button></div>
+</div>
+<div id="finalContent" style="margin-top:12px">
+<div style="border-bottom:1px solid #eef6ef;padding-bottom:12px;margin-bottom:12px">
+<div><strong id="fvName"></strong></div>
+<div class="small-muted" id="fvContact"></div>
+<div class="small-muted" id="fvAddress" style="margin-top:6px"></div>
+</div>
+<div id="finalInvoiceTable"></div>
+<div style="margin-top:12px">
+<div><strong>کد پیگیری:</strong> <span id="fvTracking"></span></div>
+<div style="margin-top:6px"><strong>شماره کارت جهت واریز:</strong> <span id="cardNumber">6789-2345-9071-4037</span></div>
+<p style="margin-top:10px">لطفا پس از واریز مبلغ فاکتور، عکس فیش واریزی را دایرکت ارسال نمایید. با تشکر.</p>
+</div>
+<div style="display:flex;gap:8px;justify-content:center;margin-top:16px">
+<button id="saveInvoice" class="btn">ذخیره فاکتور</button>
+<button id="editInvoice" class="btn secondary">بازگشت به صفحه قبل</button>
+<button id="exitInvoice" class="btn secondary">خروج</button>
+</div>
+</div>
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
+
 <script>
 /*************************************************
- * تنظیمات Airtable
+ * تنظیمات Airtable و محصولات
  *************************************************/
-const AIRTABLE_API_KEY = "pat1iEijQv0UVLxkE.c6e172d13028fe54fc3db80daaf8a4ac26045faefac7d80601a4104459a62e26";
-const AIRTABLE_BASE_ID = "appLkNDICXNqxSDhG";
-const AIRTABLE_TABLE_NAME = "Orders";
+const AIRTABLE_API_KEY = 'pat1iEijQv0UVLxkE.c6e172d13028fe54fc3db80daaf8a4ac26045faefac7d80601a4104459a62e26';
+const AIRTABLE_BASE_ID = 'appLkNDICXNqxSDhG';
+const AIRTABLE_TABLE_NAME = 'Orders';
+const BACKEND_SECRET = 'Qaz@123123';
 
-/*************************************************
- * لیست محصولات (همانند قبل)
- *************************************************/
 const PRODUCTS = [
-  { id: "zaferan", title: "زعفران", price: 250000, image: "image/zaferan.jpg", unit: "یک بسته" },
-  { id: "zereshk", title: "زرشک", price: 120000, image: "image/zereshk.jpg", unit: "یک بسته" },
-  { id: "anab", title: "عناب", price: 100000, image: "image/anab.jpg", unit: "یک بسته" },
-  { id: "asal", title: "عسل", price: 180000, image: "image/asal.jpg", unit: "یک شیشه" }
+{id:"zaferan", title:"زعفران", price:250000, image:"image/zaferan.jpg", unit:"یک بسته"},
+{id:"zereshk", title:"زرشک", price:120000, image:"image/zereshk.jpg", unit:"یک بسته"},
+{id:"anab", title:"عناب", price:100000, image:"image/anab.jpg", unit:"یک بسته"},
+{id:"asal", title:"عسل", price:180000, image:"image/asal.jpg", unit:"یک شیشه"}
 ];
 
 let cart = {};
+let trackingId = null;
 const STORAGE_KEY = 'organikaar_order_draft';
 
 /*************************************************
- * رندر محصولات و مدیریت qty
+ * Generate tracking
  *************************************************/
-const productsEl = document.getElementById('products');
-function renderProducts(){
-  productsEl.innerHTML = '';
-  PRODUCTS.forEach(p=>{
-    const qty = cart[p.id] || 0;
-    const div = document.createElement('div');
-    div.className = 'card';
-    div.innerHTML = `
-      <img src="${p.image}" alt="${p.title}">
-      <div class="title">${p.title}</div>
-      <div class="desc">${p.unit}</div>
-      <div class="price">${p.price.toLocaleString()}</div>
-      <div class="qty">
-        <button class="btn-circle" data-action="dec" data-id="${p.id}">−</button>
-        <div class="num" id="num-${p.id}">${qty}</div>
-        <button class="btn-circle" data-action="inc" data-id="${p.id}">+</button>
-      </div>
-    `;
-    productsEl.appendChild(div);
-  });
+function genTracking(){
+const dt = new Date();
+const pad=n=>String(n).padStart(2,'0');
+const stamp=`${dt.getFullYear()}${pad(dt.getMonth()+1)}${pad(dt.getDate())}-${pad(dt.getHours())}${pad(dt.getMinutes())}${pad(dt.getSeconds())}`;
+const rand=Math.floor(Math.random()*900+100);
+return `ORG-${stamp}-${rand}`;
 }
 
-productsEl.addEventListener('click', (e)=>{
-  const btn = e.target.closest('button');
-  if(!btn) return;
-  const action = btn.dataset.action;
-  const id = btn.dataset.id;
-  if(action === 'inc'){ cart[id] = (cart[id]||0) + 1; }
-  if(action === 'dec'){ cart[id] = Math.max(0,(cart[id]||0)-1); if(cart[id]===0) delete cart[id]; }
-  saveDraftToLocal();
-  updateUI();
+/*************************************************
+ * Render products
+ *************************************************/
+const productsEl=document.getElementById('products');
+function renderProducts(){
+productsEl.innerHTML='';
+PRODUCTS.forEach(p=>{
+const qty=cart[p.id]||0;
+const div=document.createElement('div');
+div.className='card';
+div.innerHTML=`<img src="${p.image}" alt="${p.title}"><div class="title">${p.title}</div><div class="desc">${p.unit}</div><div class="price">${p.price.toLocaleString()}</div><div class="qty"><button class="btn-circle" data-action="dec" data-id="${p.id}">−</button><div class="num" id="num-${p.id}">${qty}</div><button class="btn-circle" data-action="inc" data-id="${p.id}">+</button></div>`;
+productsEl.appendChild(div);
+});
+}
+productsEl.addEventListener('click',(e)=>{
+const btn=e.target.closest('button');
+if(!btn)return;
+const action=btn.dataset.action,id=btn.dataset.id;
+if(action==='inc'){cart[id]=(cart[id]||0)+1;}
+if(action==='dec'){cart[id]=Math.max(0,(cart[id]||0)-1);if(cart[id]===0)delete cart[id];}
+saveDraftToLocal();updateUI();
 });
 
 /*************************************************
  * Invoice rendering
  *************************************************/
-const invoiceTbody = document.querySelector('#invoice-table tbody');
-const totalDisplay = document.getElementById('totalDisplay');
+const invoiceTbody=document.querySelector('#invoice-table tbody');
+const totalDisplay=document.getElementById('totalDisplay');
+const trackingDisplay=document.getElementById('trackingDisplay');
 
 function updateUI(){
-  invoiceTbody.innerHTML = '';
-  let total = 0;
-  Object.keys(cart).forEach(pid=>{
-    const p = PRODUCTS.find(x=>x.id===pid);
-    const qty = cart[pid];
-    const line = p.price * qty;
-    total += line;
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${p.title}</td><td>${qty}</td><td>${p.price.toLocaleString()}</td><td>${line.toLocaleString()}</td>`;
-    invoiceTbody.appendChild(tr);
-  });
-  totalDisplay.textContent = total.toLocaleString();
-  PRODUCTS.forEach(p=>{
-    const el = document.getElementById(`num-${p.id}`);
-    if(el) el.textContent = cart[p.id]||0;
-  });
+invoiceTbody.innerHTML='';
+let total=0;
+Object.keys(cart).forEach(pid=>{
+const p=PRODUCTS.find(x=>x.id===pid);
+const qty=cart[pid];
+const line=p.price*qty;
+total+=line;
+const tr=document.createElement('tr');
+tr.innerHTML=`<td>${p.title}</td><td>${qty}</td><td>${p.price.toLocaleString()}</td><td>${line.toLocaleString()}</td>`;
+invoiceTbody.appendChild(tr);
+});
+totalDisplay.textContent=total.toLocaleString();
+trackingDisplay.textContent=trackingId||'—';
+PRODUCTS.forEach(p=>{
+const el=document.getElementById(`num-${p.id}`);
+if(el)el.textContent=cart[p.id]||0;
+});
 }
 
 /*************************************************
  * Local draft save/load
  *************************************************/
 function saveDraftToLocal(){
-  const formVals = getFormValues();
-  const payload = { cart, form: formVals };
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+const formVals=getFormValues();
+const payload={cart, form:formVals, trackingId};
+localStorage.setItem(STORAGE_KEY,JSON.stringify(payload));
 }
 function loadDraftFromLocal(){
-  const raw = localStorage.getItem(STORAGE_KEY);
-  if(!raw) return;
-  try{
-    const obj = JSON.parse(raw);
-    cart = obj.cart || {};
-    if(obj.form){
-      document.getElementById('fullname').value = obj.form.fullname || '';
-      document.getElementById('mobile').value = obj.form.mobile || '';
-      document.getElementById('address').value = obj.form.address || '';
-      document.getElementById('postal').value = obj.form.postal || '';
-      document.getElementById('note').value = obj.form.note || '';
-    }
-  }catch(e){}
+const raw=localStorage.getItem(STORAGE_KEY);
+if(!raw)return;
+try{
+const obj=JSON.parse(raw);
+cart=obj.cart||{};
+trackingId=obj.trackingId||null;
+if(obj.form){
+document.getElementById('fullname').value=obj.form.fullname||'';
+document.getElementById('mobile').value=obj.form.mobile||'';
+document.getElementById('address').value=obj.form.address||'';
+document.getElementById('postal').value=obj.form.postal||'';
+document.getElementById('note').value=obj.form.note||'';
+}
+}catch(e){}
 }
 
 /*************************************************
- * Validate form
+ * Validation
  *************************************************/
 function validateForm(){
-  let ok=true;
-  const fullname = document.getElementById('fullname').value.trim();
-  const mobile = document.getElementById('mobile').value.trim();
-  const address = document.getElementById('address').value.trim();
-  const postal = document.getElementById('postal').value.trim();
-
-  if(!/^.{2,}$/.test(fullname)){ document.getElementById('err-fullname').style.display='block'; ok=false; } else document.getElementById('err-fullname').style.display='none';
-  if(!/^09\d{9}$/.test(mobile)){ document.getElementById('err-mobile').style.display='block'; ok=false; } else document.getElementById('err-mobile').style.display='none';
-  if(address.length < 10){ document.getElementById('err-address').style.display='block'; ok=false; } else document.getElementById('err-address').style.display='none';
-  if(!/^\d{10}$/.test(postal)){ document.getElementById('err-postal').style.display='block'; ok=false; } else document.getElementById('err-postal').style.display='none';
-  if(Object.keys(cart).length === 0){ alert("لطفا حداقل یک محصول را انتخاب کنید."); ok=false; }
-  return ok;
+let ok=true;
+const fullname=document.getElementById('fullname').value.trim();
+const mobile=document.getElementById('mobile').value.trim();
+const address=document.getElementById('address').value.trim();
+const postal=document.getElementById('postal').value.trim();
+if(!/^.{2,}$/.test(fullname)){document.getElementById('err-fullname').style.display='block';ok=false;}else document.getElementById('err-fullname').style.display='none';
+if(!/^09\d{9}$/.test(mobile)){document.getElementById('err-mobile').style.display='block';ok=false;}else document.getElementById('err-mobile').style.display='none';
+if(address.length<10){document.getElementById('err-address').style.display='block';ok=false;}else document.getElementById('err-address').style.display='none';
+if(!/^\d{10}$/.test(postal)){document.getElementById('err-postal').style.display='block';ok=false;}else document.getElementById('err-postal').style.display='none';
+if(Object.keys(cart).length===0){alert("لطفا حداقل یک محصول را انتخاب کنید.");ok=false;}
+return ok;
 }
-
 function getFormValues(){
-  return {
-    fullname: document.getElementById('fullname').value.trim(),
-    mobile: document.getElementById('mobile').value.trim(),
-    address: document.getElementById('address').value.trim(),
-    postal: document.getElementById('postal').value.trim(),
-    note: document.getElementById('note').value.trim(),
-  };
+return{
+fullname:document.getElementById('fullname').value.trim(),
+mobile:document.getElementById('mobile').value.trim(),
+address:document.getElementById('address').value.trim(),
+postal:document.getElementById('postal').value.trim(),
+note:document.getElementById('note').value.trim(),
+};
 }
 
 /*************************************************
- * ارسال به Airtable
+ * Confirm button
  *************************************************/
-async function sendInvoiceToAirtable(){
-  const form = getFormValues();
-  const itemsText = Object.keys(cart).map(pid=>{
-    const p = PRODUCTS.find(x=>x.id===pid);
-    return `${p.title} × ${cart[pid]}`;
-  }).join('\n');
-  const total = Object.keys(cart).reduce((sum,pid)=>{
-    const p = PRODUCTS.find(x=>x.id===pid);
-    return sum + p.price * cart[pid];
-  },0);
+const confirmBtn=document.getElementById('confirmBtn');
+const overlay=document.getElementById('overlay');
 
-  const payload = {
-    fields:{
-      Date: new Date().toISOString(),
-      CustomerName: form.fullname,
-      Phone: form.mobile,
-      Address: form.address,
-      PostalCode: form.postal,
-      Items: itemsText,
-      Total: total,
-      Notes: form.note
-    }
-  };
+confirmBtn.addEventListener('click',async ()=>{
+if(!validateForm())return;
+if(!trackingId){trackingId=genTracking();saveDraftToLocal();}
+fillFinalModal();
+overlay.style.display='flex';
+await sendInvoiceToAirtable(false);
+});
 
-  try{
-    const res = await fetch(`https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${AIRTABLE_TABLE_NAME}`,{
-      method:'POST',
-      headers:{
-        'Authorization':'Bearer '+AIRTABLE_API_KEY,
-        'Content-Type':'application/json'
-      },
-      body: JSON.stringify(payload)
-    });
-    const data = await res.json();
-    console.log('Airtable response', data);
-  }catch(err){
-    console.error('Airtable error', err);
-  }
+function fillFinalModal(){
+const f=getFormValues();
+document.getElementById('fvName').textContent=f.fullname;
+document.getElementById('fvContact').textContent=`همراه: ${f.mobile} — کدپستی: ${f.postal}`;
+document.getElementById('fvAddress').textContent=f.address;
+document.getElementById('fvTracking').textContent=trackingId;
+let html='<table style="width:100%;border-collapse:collapse"><thead><tr style="background:#0f6b52;color:white"><th>محصول</th><th>تعداد</th><th>قیمت واحد</th><th>مجموع</th></tr></thead><tbody>';
+let total=0;
+Object.keys(cart).forEach(pid=>{
+const p=PRODUCTS.find(x=>x.id===pid);
+const qty=cart[pid];
+const line=p.price*qty;
+total+=line;
+html+=`<tr><td style="padding:8px">${p.title}</td><td style="text-align:center">${qty}</td><td style="text-align:center">${p.price.toLocaleString()}</td><td style="text-align:center">${line.toLocaleString()}</td></tr>`;
+});
+html+=`</tbody></table><div style="text-align:right;margin-top:8px"><strong>جمع کل: ${total.toLocaleString()} تومان</strong></div>`;
+document.getElementById('finalInvoiceTable').innerHTML=html;
 }
 
 /*************************************************
- * دکمه تایید نهایی
+ * Modal buttons
  *************************************************/
-document.getElementById('confirmBtn').addEventListener('click', async ()=>{
-  if(!validateForm()) return;
-  fillFinalModal();
-  document.getElementById('overlay').style.display='flex';
-  await sendInvoiceToAirtable();
+document.getElementById('closePreview').addEventListener('click',()=>overlay.style.display='none');
+document.getElementById('editInvoice').addEventListener('click',()=>overlay.style.display='none');
+document.getElementById('exitInvoice').addEventListener('click',()=>overlay.style.display='none');
+
+document.getElementById('saveInvoice').addEventListener('click',()=>{
+const element=document.getElementById('finalContent');
+html2pdf().from(element).save(`Invoice_${trackingId}.pdf`);
 });
 
 /*************************************************
- * مودال پیش‌فاکتور
+ * Airtable send
  *************************************************/
-function fillFinalModal(){
-  const f = getFormValues();
-  document.getElementById('fvName').textContent = f.fullname;
-  document.getElementById('fvContact').textContent = `همراه: ${f.mobile} — کدپستی: ${f.postal}`;
-  document.getElementById('fvAddress').textContent = f.address;
-
-  let html = '<table style="width:100%;border-collapse:collapse"><thead><tr style="background:#0f6b52;color:white"><th>محصول</th><th>تعداد</th><th>قیمت واحد</th><th>مجموع</th></tr></thead><tbody>';
-  let total=0;
-  Object.keys(cart).forEach(pid=>{
-    const p = PRODUCTS.find(x=>x.id===pid);
-    const qty = cart[pid];
-    const line = p.price * qty;
-    total += line;
-    html += `<tr><td style="padding:8px">${p.title}</td><td style="text-align:center">${qty}</td><td style="text-align:center">${p.price.toLocaleString()}</td><td style="text-align:center">${line.toLocaleString()}</td></tr>`;
-  });
-  html += `</tbody></table><div style="text-align:right;margin-top:8px;font-weight:800">جمع کل: ${total.toLocaleString()} تومان</div>`;
-  document.getElementById('finalInvoiceTable').innerHTML = html;
+async function sendInvoiceToAirtable(showAlert=true){
+const form=getFormValues();
+const payload={
+fields:{
+Date:new Date().toISOString(),
+TrackingCode:trackingId,
+CustomerName:form.fullname,
+Phone:form.mobile,
+Address:form.address,
+PostalCode:form.postal,
+Items:JSON.stringify(cart),
+Total:totalDisplay.textContent,
+Status:'Pending',
+Notes:form.note,
+Secret:BACKEND_SECRET
+}
+};
+try{
+const res=await fetch(`https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${AIRTABLE_TABLE_NAME}`,{
+method:'POST',
+headers:{
+'Authorization':'Bearer '+AIRTABLE_API_KEY,
+'Content-Type':'application/json'
+},
+body:JSON.stringify(payload)
+});
+if(showAlert)alert("سفارش شما با موفقیت ثبت شد ✅");
+}catch(e){console.error(e);if(showAlert)alert("خطا در ثبت سفارش ❌");}
 }
 
 /*************************************************
- * بارگذاری اولیه
+ * Initialize
  *************************************************/
-function init(){
-  loadDraftFromLocal();
-  renderProducts();
-  updateUI();
-  ['fullname','mobile','address','postal','note'].forEach(id=>document.getElementById(id).addEventListener('input', saveDraftToLocal));
-}
-init();
+loadDraftFromLocal();
+renderProducts();
+updateUI();
 </script>
+</body>
+</html>
