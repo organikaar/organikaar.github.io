@@ -479,6 +479,50 @@
   });
 
   </script>
+  <script>
+const BACKEND_SECRET = 'Qaz@123123'; // رمز App Script
+const endpoint = 'YOUR_DEPLOYED_WEB_APP_URL'; // لینک Web App
+
+document.getElementById('orderForm').addEventListener('submit', async (e) => {
+  e.preventDefault(); // جلوگیری از ریفرش فرم
+
+  const form = e.target;
+
+  // تولید شماره پیگیری خودکار
+  const trackingCode = 'TRK' + Date.now();
+
+  // جمع‌آوری داده‌ها از فرم
+  const orderData = {
+    date: new Date().toISOString(),
+    trackingCode: trackingCode,
+    name: form.name.value,
+    phone: form.phone.value,
+    address: form.address.value,
+    postalCode: form.postalCode.value,
+    items: form.items ? form.items.value : '', // اگر textarea اقلام سفارش دارید
+    total: form.total ? form.total.value : '', // اگر جمع کل دارید
+    status: 'Pending',
+    notes: ''
+  };
+
+  try {
+    const res = await fetch(endpoint + '?secret=' + BACKEND_SECRET, {
+      method: 'POST',
+      body: JSON.stringify(orderData),
+    });
+    const data = await res.json();
+
+    console.log('سفارش ثبت شد:', data); // فقط پشت صحنه
+    alert('سفارش شما با موفقیت ثبت شد!\nکد پیگیری: ' + trackingCode);
+    form.reset(); // پاک شدن فرم بعد از ثبت
+  } catch (err) {
+    console.error(err);
+    alert('خطا در ثبت سفارش، دوباره تلاش کنید!');
+  }
+});
+</script>
+
 </body>
 </html>
+
 
