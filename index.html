@@ -187,8 +187,8 @@
   /*************************************************
    * تنظیمات اولیه و محصولات
    *************************************************/
-  const BACKEND_URL = "https://script.google.com/macros/s/AKfycbzhL2CaZe47V1cI4D3wOI_qW37GOKmRy_ozIUhCPV83D0C32NTGwZHEYxDfppIqDdjzMw/exec"; // -> جایگزین کن اگر Google Sheets می‌خوای
-  const BACKEND_SECRET = "Qaz@123123"; // -> مطمئن شو این را در Apps Script هم قرار بدی
+ // const BACKEND_URL = "https://script.google.com/macros/s/AKfycbw7vDJBAhZuOK1WheCbSeOKxDXdp_yGDcF6W3vGUJE9sSISOM5qNZM0MLgBaLgjxC7eXg/exec"; // -> جایگزین کن اگر Google Sheets می‌خوای
+//  const BACKEND_SECRET = "Qaz@123123"; // -> مطمئن شو این را در Apps Script هم قرار بدی
 
   // لیست محصولات: برای اضافه کردن محصول، یک آیتم جدید به این آرایه اضافه کن
   const PRODUCTS = [
@@ -481,7 +481,7 @@
   </script>
   <script>
 const BACKEND_SECRET = 'Qaz@123123'; // رمز App Script
-const endpoint = 'YOUR_DEPLOYED_WEB_APP_URL'; // لینک Web App
+const endpoint = 'https://script.google.com/macros/s/AKfycbw7vDJBAhZuOK1WheCbSeOKxDXdp_yGDcF6W3vGUJE9sSISOM5qNZM0MLgBaLgjxC7eXg/exec'; // لینک Web App
 
 document.getElementById('orderForm').addEventListener('submit', async (e) => {
   e.preventDefault(); // جلوگیری از ریفرش فرم
@@ -524,6 +524,7 @@ document.getElementById('orderForm').addEventListener('submit', async (e) => {
 
 </body>
 </html>
+
 
 
 
