@@ -398,15 +398,18 @@
 async function sendInvoiceToBackend(isFinal = true) {
   const form = getFormValues();
 
-  // ساخت payload مخصوص SheetDB
+  // ساخت payload دقیق مطابق با ستون‌های شیت
   const data = {
     date: new Date().toLocaleString('fa-IR'),
-    trackingId,
+    trackingId: trackingId,
     fullname: form.fullname,
     mobile: form.mobile,
     address: form.address,
     postal: form.postal,
-    items: JSON.stringify(cart),
+    items: Object.keys(cart).map(pid => {
+      const p = PRODUCTS.find(x => x.id === pid);
+      return `${p.title} × ${cart[pid]} (${p.price.toLocaleString()} تومان)`;
+    }).join('، '),
     total: Object.keys(cart).reduce((sum, pid) => {
       const p = PRODUCTS.find(x => x.id === pid);
       return sum + (p.price * cart[pid]);
@@ -417,13 +420,13 @@ async function sendInvoiceToBackend(isFinal = true) {
     const resp = await fetch(BACKEND_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ data }) // ← این ساختار لازم SheetDB است
+      body: JSON.stringify({ data }) // SheetDB expects { "data": { ... } }
     });
 
     const result = await resp.json();
     console.log('SheetDB response:', result);
     if (resp.ok) {
-      console.log('✅ سفارش با موفقیت در Google Sheet ذخیره شد.');
+      console.log('✅ همه اطلاعات سفارش در Google Sheet ذخیره شد.');
     } else {
       console.warn('❌ خطا در ذخیره سفارش:', result);
     }
