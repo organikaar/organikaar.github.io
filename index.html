@@ -1,10 +1,13 @@
-<!doctype html>   
+<!doctype html> 
 <html lang="fa" dir="rtl">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>فرم سفارش - ارگانیکار</title>
+
+  <!-- Fonts: اگر فایل فونت محلی داری، @font-face اضافه کن -->
   <style>
+    /* مثال ساده فونت. اگر IranYekan/ Shabnam داری، @font-face اینجا بذار */
     body { font-family: "IRAN-Sans", "Tahoma", sans-serif; background:#f6fbf6; margin:0; color:#104431; }
     :root{
       --green:#0f6b52;
@@ -14,11 +17,15 @@
       --card-shadow: 0 6px 18px rgba(15,107,82,0.08);
       --radius:14px;
     }
+
+    /* صفحه کانتینر */
     .wrap{max-width:1100px;margin:28px auto;padding:18px;}
     header{display:flex;flex-direction:column;align-items:center;gap:8px;padding:14px;border-radius:12px 12px 8px 8px;background:linear-gradient(180deg,var(--green),#0e6a48);color:white}
     header img{width:84px;height:84px;border-radius:50%;object-fit:cover;border:3px solid rgba(255,255,255,0.12)}
     header h1{margin:0;font-size:20px;letter-spacing:0.6px}
     header p{margin:0;font-size:14px;opacity:0.95}
+
+    /* محصولات */
     .products{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:26px}
     .card{background:var(--cream);border-radius:12px;padding:14px;box-shadow:var(--card-shadow);display:flex;flex-direction:column;align-items:center;transition:transform .18s ease, box-shadow .18s ease}
     .card:hover{transform:translateY(-6px);box-shadow:0 18px 30px rgba(15,107,82,0.12)}
@@ -29,12 +36,16 @@
     .qty{display:flex;align-items:center;gap:8px;margin-top:10px}
     .btn-circle{width:34px;height:34px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;border:none;background:var(--green);color:white;font-weight:700;cursor:pointer}
     .qty .num{min-width:34px;text-align:center;font-weight:700}
+
+    /* فاکتور */
     .invoice-card{margin-top:28px;background:var(--cream);border-radius:14px;padding:18px;border:2px solid rgba(15,107,82,0.08);box-shadow:var(--card-shadow)}
     .invoice-card h3{text-align:center;margin:8px 0 18px}
     table{width:100%;border-collapse:collapse}
     table th, table td{padding:8px;border:1px solid #e6f0ea;text-align:center}
     table th{background:var(--green);color:white}
     .summary{display:flex;justify-content:space-between;margin-top:12px;font-weight:800}
+
+    /* فرم ورودی */
     form{margin-top:26px;background:#fff;border-radius:12px;padding:18px;box-shadow:var(--card-shadow)}
     .form-row{display:flex;gap:12px;flex-wrap:wrap}
     .field{flex:1;min-width:220px;display:flex;flex-direction:column;margin-bottom:12px}
@@ -42,19 +53,27 @@
     .field input, .field textarea{padding:10px;border-radius:8px;border:1px solid #dfeee6;background:#fbfffb}
     textarea{min-height:90px;resize:vertical}
     .error{color:#b83b3b;font-size:13px;margin-top:6px;display:none}
+
+    /* CTA */
     .cta-row{display:flex;gap:12px;justify-content:center;margin-top:18px}
     .btn{background:var(--green);color:white;padding:12px 18px;border-radius:10px;border:none;cursor:pointer;font-weight:800;box-shadow:0 6px 14px rgba(15,107,82,0.12)}
     .btn.secondary{background:transparent;border:2px solid var(--green);color:var(--green);font-weight:700}
+
+    /* Modal preview فاکتور نهایی */
     .overlay{position:fixed;inset:0;background:rgba(6,12,8,0.45);display:none;align-items:center;justify-content:center;padding:20px;z-index:1200}
     .modal{background:white;border-radius:12px;padding:18px;max-width:900px;width:100%;max-height:90vh;overflow:auto}
     .modal .top{display:flex;justify-content:space-between;align-items:center;gap:12px}
     .small-muted{font-size:13px;color:#7b8f86}
+
+    /* Responsive */
     @media (max-width:900px){ .products{grid-template-columns:repeat(2,1fr)} }
     @media (max-width:600px){
       .products{grid-template-columns:1fr;gap:12px}
       .form-row{flex-direction:column}
       header img{width:68px;height:68px}
     }
+
+    /* ظاهرسازی دکمه‌ها و افکت */
     .tiny{font-size:12px;padding:8px 10px}
   </style>
 </head>
@@ -66,12 +85,16 @@
       <p>طبیعت، در خالص‌ترین شکلش در ارگانیکار 🌿</p>
     </header>
 
-    <section id="products" class="products" aria-label="انتخاب محصولات"></section>
+    <!-- محصولات -->
+    <section id="products" class="products" aria-label="انتخاب محصولات">
+      <!-- کارت محصولات توسط JS رندر می‌شود -->
+    </section>
 
+    <!-- فاکتور (آنی آپدیت می‌شود) -->
     <section class="invoice-card" aria-label="فاکتور خرید">
       <h3>فاکتور خرید</h3>
       <div id="invoice-area">
-        <table id="invoice-table">
+        <table id="invoice-table" aria-live="polite">
           <thead>
             <tr><th>محصول</th><th>تعداد</th><th>قیمت واحد (تومان)</th><th>مجموع (تومان)</th></tr>
           </thead>
@@ -84,34 +107,35 @@
       </div>
     </section>
 
+    <!-- فرم اطلاعات مشتری -->
     <form id="customerForm" novalidate>
       <div class="form-row">
         <div class="field">
           <label for="fullname">نام و نام خانوادگی</label>
           <input id="fullname" name="fullname" type="text" placeholder="مثال: میثم رضایی" required>
-          <div class="error" id="err-fullname">نام معتبر وارد کنید</div>
+          <div class="error" id="err-fullname">نام معتبر وارد کنید (فارسی، حداقل دو حرف)</div>
         </div>
         <div class="field">
           <label for="mobile">شماره همراه</label>
           <input id="mobile" name="mobile" type="tel" placeholder="09xxxxxxxxx" required>
-          <div class="error" id="err-mobile">شماره همراه معتبر وارد کنید</div>
+          <div class="error" id="err-mobile">شماره همراه معتبر وارد کنید (مثال: 0912xxxxxxx)</div>
         </div>
 
         <div class="field" style="flex-basis:100%">
           <label for="address">آدرس کامل</label>
-          <textarea id="address" name="address" required></textarea>
-          <div class="error" id="err-address">آدرس را کامل وارد کنید</div>
+          <textarea id="address" name="address" placeholder="آدرس پستی، استان، شهر، خیابان، پلاک..." required></textarea>
+          <div class="error" id="err-address">آدرس را کامل وارد کنید (حداقل ۱۰ کاراکتر)</div>
         </div>
 
         <div class="field">
           <label for="postal">کد پستی</label>
           <input id="postal" name="postal" type="text" placeholder="۱۰ رقم" required>
-          <div class="error" id="err-postal">کدپستی معتبر وارد کنید</div>
+          <div class="error" id="err-postal">کدپستی معتبر (۱۰ رقم) وارد کنید</div>
         </div>
 
         <div class="field">
           <label for="note">توضیحات سفارش (اختیاری)</label>
-          <textarea id="note" name="note"></textarea>
+          <textarea id="note" name="note" placeholder="مثلاً زمان تحویل موردنظر"></textarea>
         </div>
       </div>
 
@@ -122,32 +146,260 @@
     </form>
   </div>
 
+  <!-- پیش فاکتور مودال -->
   <div class="overlay" id="overlay">
-    <div class="modal">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="finalTitle">
       <div class="top">
-        <h2>پیش‌فاکتور / فاکتور نهایی</h2>
-        <button id="closePreview" class="btn secondary tiny">بستن</button>
+        <h2 id="finalTitle">پیش‌فاکتور / فاکتور نهایی</h2>
+        <div><button id="closePreview" class="btn secondary tiny">بستن</button></div>
       </div>
 
-      <div id="finalContent" style="margin-top:12px"></div>
+      <div id="finalContent" style="margin-top:12px">
+        <!-- اطلاعات مشتری -->
+        <div style="border-bottom:1px solid #eef6ef;padding-bottom:12px;margin-bottom:12px">
+          <div><strong id="fvName"></strong></div>
+          <div class="small-muted" id="fvContact"></div>
+          <div class="small-muted" id="fvAddress" style="margin-top:6px"></div>
+        </div>
 
-      <div style="display:flex;gap:8px;justify-content:center;margin-top:16px">
-        <button id="saveInvoice" class="btn">ذخیره فاکتور</button>
-        <button id="editInvoice" class="btn secondary">بازگشت</button>
-        <button id="exitInvoice" class="btn secondary">خروج</button>
+        <!-- جدول فاکتور -->
+        <div id="finalInvoiceTable"></div>
+
+        <div style="margin-top:12px">
+          <div><strong>کد پیگیری:</strong> <span id="fvTracking"></span></div>
+          <div style="margin-top:6px"><strong>شماره کارت جهت واریز:</strong> <span id="cardNumber">6789-2345-9071-4037</span></div>
+          <p style="margin-top:10px">لطفا پس از واریز مبلغ فاکتور، عکس فیش واریزی را دایرکت ارسال نمایید. با تشکر.</p>
+        </div>
+
+        <div style="display:flex;gap:8px;justify-content:center;margin-top:16px">
+          <button id="saveInvoice" class="btn">ذخیره فاکتور</button>
+          <button id="editInvoice" class="btn secondary">بازگشت به صفحه قبل</button>
+          <button id="exitInvoice" class="btn secondary">خروج</button>
+        </div>
       </div>
     </div>
   </div>
 
+  <!-- کتابخانه html2pdf برای دانلود پی‌دی‌اف (CDN) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
+
   <script>
+  /*************************************************
+   * تنظیمات اولیه و محصولات
+   *************************************************/
   const BACKEND_URL = "https://script.google.com/macros/s/AKfycbwCqS51wRO7Qbx83852KV0MJoemLZma3m0T84EsY0hC-id31rBq2gJvKcOAqwNhFkSgwA/exec";
-  const BACKEND_SECRET = "Qaz@123123";
+  const BACKEND_SECRET = "Meysam0640346960";
 
-  // --- (تمامی کدهای اصلی JS بدون تغییر، از فایل قبلی حفظ شده‌اند) ---
-  // 👇 فقط بخش ارسال به بک‌اند و آدرس URL تنظیم شده است
+  // لیست محصولات: برای اضافه کردن محصول، یک آیتم جدید به این آرایه اضافه کن
+  const PRODUCTS = [
+    { id: "zaferan", title: "زعفران", price: 250000, image: "image/zaferan.jpg", unit: "یک بسته" },
+    { id: "zereshk", title: "زرشک", price: 120000, image: "image/zereshk.jpg", unit: "یک بسته" },
+    { id: "anab", title: "عناب", price: 100000, image: "image/anab.jpg", unit: "یک بسته" },
+    { id: "asal", title: "عسل", price: 180000, image: "image/asal.jpg", unit: "یک شیشه" }
+  ];
 
+  // وضعیت سبد
+  let cart = {}; // { productId: qty }
+  // وضعیت پیش‌نویس/تراکنش
+  let trackingId = null;
+  const STORAGE_KEY = 'organikaar_order_draft';
+
+  /*************************************************
+   * Util: generate tracking id
+   *************************************************/
+  function genTracking() {
+    const dt = new Date();
+    const pad = n => String(n).padStart(2,'0');
+    const stamp = `${dt.getFullYear()}${pad(dt.getMonth()+1)}${pad(dt.getDate())}-${pad(dt.getHours())}${pad(dt.getMinutes())}${pad(dt.getSeconds())}`;
+    const rand = Math.floor(Math.random()*900+100);
+    return `ORG-${stamp}-${rand}`;
+  }
+
+  /*************************************************
+   * Render products
+   *************************************************/
+  const productsEl = document.getElementById('products');
+  function renderProducts(){
+    productsEl.innerHTML = '';
+    PRODUCTS.forEach(p=>{
+      const qty = cart[p.id] || 0;
+      const div = document.createElement('div');
+      div.className = 'card';
+      div.innerHTML = `
+        <img src="${p.image}" alt="${p.title}">
+        <div class="title">${p.title}</div>
+        <div class="desc">${p.unit}</div>
+        <div class="price">${p.price.toLocaleString()}</div>
+        <div class="qty">
+          <button class="btn-circle" data-action="dec" data-id="${p.id}">−</button>
+          <div class="num" id="num-${p.id}">${qty}</div>
+          <button class="btn-circle" data-action="inc" data-id="${p.id}">+</button>
+        </div>
+      `;
+      productsEl.appendChild(div);
+    });
+  }
+
+  // مدیریت کلیک افزایش/کاهش
+  productsEl.addEventListener('click', (e)=>{
+    const btn = e.target.closest('button');
+    if(!btn) return;
+    const action = btn.dataset.action;
+    const id = btn.dataset.id;
+    if(action === 'inc'){ cart[id] = (cart[id]||0) + 1; }
+    if(action === 'dec'){ cart[id] = Math.max(0,(cart[id]||0)-1); if(cart[id]===0) delete cart[id]; }
+    saveDraftToLocal();
+    updateUI();
+  });
+
+  /*************************************************
+   * Invoice rendering
+   *************************************************/
+  const invoiceTbody = document.querySelector('#invoice-table tbody');
+  const totalDisplay = document.getElementById('totalDisplay');
+  const trackingDisplay = document.getElementById('trackingDisplay');
+
+  function updateUI(){
+    // جدول
+    invoiceTbody.innerHTML = '';
+    let total = 0;
+    Object.keys(cart).forEach(pid=>{
+      const p = PRODUCTS.find(x=>x.id===pid);
+      const qty = cart[pid];
+      const line = p.price * qty;
+      total += line;
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${p.title}</td><td>${qty}</td><td>${p.price.toLocaleString()}</td><td>${line.toLocaleString()}</td>`;
+      invoiceTbody.appendChild(tr);
+    });
+    totalDisplay.textContent = total.toLocaleString();
+    trackingDisplay.textContent = trackingId || '—';
+    // نوشتن شماره‌های qty روی کارت‌ها
+    PRODUCTS.forEach(p=>{
+      const el = document.getElementById(`num-${p.id}`);
+      if(el) el.textContent = cart[p.id]||0;
+    });
+  }
+
+  /*************************************************
+   * Local draft save/load (برای نگهداری زمانی که کاربر بازگشت می‌کند)
+   *************************************************/
+  function saveDraftToLocal(){
+    const formVals = getFormValues();
+    const payload = { cart, form: formVals, trackingId };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+  }
+  function loadDraftFromLocal(){
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return;
+    try{
+      const obj = JSON.parse(raw);
+      cart = obj.cart || {};
+      trackingId = obj.trackingId || null;
+      // پر کردن فرم اگر وجود داشته باشد
+      if(obj.form){
+        document.getElementById('fullname').value = obj.form.fullname || '';
+        document.getElementById('mobile').value = obj.form.mobile || '';
+        document.getElementById('address').value = obj.form.address || '';
+        document.getElementById('postal').value = obj.form.postal || '';
+        document.getElementById('note').value = obj.form.note || '';
+      }
+    }catch(e){}
+  }
+
+  /*************************************************
+   * اعتبارسنجی ورودی‌ها (قوانین ایران)
+   *************************************************/
+  function validateForm(){
+    let ok=true;
+    const fullname = document.getElementById('fullname').value.trim();
+    const mobile = document.getElementById('mobile').value.trim();
+    const address = document.getElementById('address').value.trim();
+    const postal = document.getElementById('postal').value.trim();
+
+    // نام: حداقل 2 حرف (فارسی یا حروف لاتین)
+    if(!/^.{2,}$/.test(fullname)){ document.getElementById('err-fullname').style.display='block'; ok=false; } else document.getElementById('err-fullname').style.display='none';
+
+    // موبایل ایران: 09xxxxxxxxx (11 رقم)
+    if(!/^09\d{9}$/.test(mobile)){ document.getElementById('err-mobile').style.display='block'; ok=false; } else document.getElementById('err-mobile').style.display='none';
+
+    // آدرس: حداقل 10 کاراکتر
+    if(address.length < 10){ document.getElementById('err-address').style.display='block'; ok=false; } else document.getElementById('err-address').style.display='none';
+
+    // کدپستی ایران: 10 رقم
+    if(!/^\d{10}$/.test(postal)){ document.getElementById('err-postal').style.display='block'; ok=false; } else document.getElementById('err-postal').style.display='none';
+
+    // حداقل یک محصول انتخاب شده
+    if(Object.keys(cart).length === 0){
+      alert("لطفا حداقل یک محصول را انتخاب کنید.");
+      ok=false;
+    }
+    return ok;
+  }
+
+  function getFormValues(){
+    return {
+      fullname: document.getElementById('fullname').value.trim(),
+      mobile: document.getElementById('mobile').value.trim(),
+      address: document.getElementById('address').value.trim(),
+      postal: document.getElementById('postal').value.trim(),
+      note: document.getElementById('note').value.trim(),
+    };
+  }
+
+  /*************************************************
+   * رفتار دکمه تایید نهایی
+   *************************************************/
+  const confirmBtn = document.getElementById('confirmBtn');
+  const overlay = document.getElementById('overlay');
+
+  confirmBtn.addEventListener('click', async ()=>{
+    if(!validateForm()) return;
+
+    // اگر هنوز trackingId ساخته نشده، بسازش و در local ذخیره کن (این تضمین میکنه که بعدا عوض نشه)
+    if(!trackingId){
+      trackingId = genTracking();
+      saveDraftToLocal();
+    }
+
+    // نمایش پیش‌فاکتور در مودال
+    fillFinalModal();
+    overlay.style.display = 'flex';
+
+    // ارسال به backend (append یا update)
+    await sendInvoiceToBackend(false); // false یعنی وضعیت اولیه (still pending) — backend خودش آپدیت/append می‌کند
+  });
+
+  // پر کردن محتوای مودال
+  function fillFinalModal(){
+    const f = getFormValues();
+    document.getElementById('fvName').textContent = f.fullname;
+    document.getElementById('fvContact').textContent = `همراه: ${f.mobile} — کدپستی: ${f.postal}`;
+    document.getElementById('fvAddress').textContent = f.address;
+    document.getElementById('fvTracking').textContent = trackingId;
+    // جدول
+    let html = '<table style="width:100%;border-collapse:collapse"><thead><tr style="background:#0f6b52;color:white"><th>محصول</th><th>تعداد</th><th>قیمت واحد</th><th>مجموع</th></tr></thead><tbody>';
+    let total=0;
+    Object.keys(cart).forEach(pid=>{
+      const p = PRODUCTS.find(x=>x.id===pid);
+      const qty = cart[pid];
+      const line = p.price * qty;
+      total += line;
+      html += `<tr><td style="padding:8px">${p.title}</td><td style="text-align:center">${qty}</td><td style="text-align:center">${p.price.toLocaleString()}</td><td style="text-align:center">${line.toLocaleString()}</td></tr>`;
+    });
+    html += `</tbody></table><div style="text-align:right;margin-top:8px;font-weight:800">جمع کل: ${total.toLocaleString()} تومان</div>`;
+    document.getElementById('finalInvoiceTable').innerHTML = html;
+  }
+
+  /*************************************************
+   * ارسال یا آپدیت فاکتور به backend (Google Sheets)
+   * behavior: در اولین ارسال append یا insert می‌کند، در ارسال‌های بعدی (با همان trackingId) آپدیت می‌کند
+   *************************************************/
   async function sendInvoiceToBackend(isFinal=true){
+    if(!BACKEND_URL || BACKEND_URL.includes("PASTE_YOUR_APPS_SCRIPT_URL_HERE")) {
+      console.warn("BACKEND_URL تنظیم نشده. برای ذخیره در Google Sheets، URL اسکریپت را قرار بده.");
+      return;
+    }
     const payload = {
       secret: BACKEND_SECRET,
       trackingId,
@@ -157,17 +409,75 @@
       form: getFormValues()
     };
     try{
-      const resp = await fetch(BACKEND_URL + "?secret=" + BACKEND_SECRET, {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
+      const resp = await fetch(BACKEND_URL, {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
         body: JSON.stringify(payload)
       });
-      const data = await resp.text();
-      console.log("response:", data);
+      const data = await resp.json();
+      console.log('backend response', data);
+      if(data && data.success) {
+        console.log('Saved to backend');
+      } else {
+        console.warn('backend did not confirm success', data);
+      }
     }catch(err){
-      console.error("sendInvoiceToBackend error", err);
+      console.error('sendInvoiceToBackend error', err);
     }
   }
+
+  /*************************************************
+   * دکمه‌ها در مودال
+   *************************************************/
+  document.getElementById('closePreview').addEventListener('click', ()=> overlay.style.display='none');
+  document.getElementById('editInvoice').addEventListener('click', ()=>{
+    // بازگشت به صفحه قبل برای ویرایش — مودال بسته می‌شود و کاربر می‌تواند تغییر دهد
+    overlay.style.display = 'none';
+    // توجه: trackingId دست‌نخورده می‌ماند (مطابق خواسته‌ات)
+  });
+  document.getElementById('exitInvoice').addEventListener('click', ()=>{
+    // خروج: پاک کردن پیش‌نویس و بازگشت به اینستاگرام / صفحه اصلی
+    if(confirm('آیا می‌خواهید فرم بسته شود و پیش‌نویس حذف گردد؟')) {
+      localStorage.removeItem(STORAGE_KEY);
+      window.location.href = 'https://instagram.com/organikaar';
+    }
+  });
+
+  // ذخیره فاکتور: دانلود PDF + ارسال final=true به backend
+  document.getElementById('saveInvoice').addEventListener('click', async ()=>{
+    // ساختن عنصر قابل پرینت
+    const el = document.createElement('div');
+    el.style.padding='18px';
+    el.style.fontFamily='inherit';
+    el.innerHTML = document.getElementById('finalContent').innerHTML;
+    document.body.appendChild(el);
+
+    // توليد PDF
+    const opt = { margin:0.5, filename:`invoice-${trackingId}.pdf`, html2canvas:{scale:1.4}, jsPDF:{unit:'in', format:'a4', orientation:'portrait'} };
+    await html2pdf().set(opt).from(el).save();
+    document.body.removeChild(el);
+
+    // ارسال نهایی به backend (علامت final)
+    await sendInvoiceToBackend(true);
+
+    alert('فاکتور دانلود شد و اطلاعات برای مدیریت ارسال شد. لطفا پس از واریز، عکس فیش را دایرکت ارسال کنید.');
+  });
+
+  /*************************************************
+   * بارگذاری اولیه
+   *************************************************/
+  function init(){
+    loadDraftFromLocal();
+    renderProducts();
+    updateUI();
+  }
+  init();
+
+  // ذخیره خودکار فرم هنگام تغییر مقادیر
+  ['fullname','mobile','address','postal','note'].forEach(id=>{
+    document.getElementById(id).addEventListener('input', saveDraftToLocal);
+  });
+
   </script>
 </body>
 </html>
