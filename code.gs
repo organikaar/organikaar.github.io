@@ -1,58 +1,53 @@
-const SHEET_NAME = 'سفارشات'; // نام شیت
-const SECRET = 'Qaz@123123'; // با BACKEND_SECRET در صفحه یکی کن
+// ---------- تنظیمات ----------
+const AIRTABLE_API_KEY = 'YOUR_API_KEY';       // کلید Airtable خودت
+const AIRTABLE_BASE_ID = 'YOUR_BASE_ID';       // Base ID Airtable
+const AIRTABLE_TABLE_NAME = 'Orders';          // اسم جدول در Airtable
+const BACKEND_SECRET = 'Qaz@123123';           // رمز اختصاصی برای امنیت
 
-function doPost(e){
-  try{
-    const body = JSON.parse(e.postData.contents);
-    if(!body || body.secret !== SECRET) {
-      return ContentService.createTextOutput(JSON.stringify({success:false, error:'invalid secret'})).setMimeType(ContentService.MimeType.JSON);
+// ---------- تابع دریافت POST ----------
+function doPost(e) {
+  try {
+    // دریافت داده از فرم
+    const data = JSON.parse(e.postData.contents);
+    const secret = e.parameter.secret;
+
+    // بررسی امنیت
+    if (secret !== BACKEND_SECRET) {
+      return ContentService.createTextOutput('Unauthorized').setResponseCode(403);
     }
 
-    const ss = SpreadsheetApp.getActiveSpreadsheet();
-    let sh = ss.getSheetByName(SHEET_NAME);
-    if(!sh){
-      sh = ss.insertSheet(SHEET_NAME);
-      // Header row
-      sh.appendRow(['trackingId','timestamp','final','fullname','mobile','address','postal','note','cartJSON','raw']);
-    }
-
-    const tracking = body.trackingId;
-    const timestamp = body.timestamp || new Date().toISOString();
-    const isFinal = !!body.final;
-    const form = body.form || {};
-    const cart = body.cart || {};
-
-    // بررسی اینکه قبلا رکوردی با همین tracking وجود دارد یا خیر
-    const data = sh.getDataRange().getValues();
-    let rowIndex = -1;
-    for(let r=1;r<data.length;r++){
-      if(String(data[r][0]) === String(tracking)){
-        rowIndex = r+1; // because sheet rows are 1-based
-        break;
+    // آماده‌سازی داده برای Airtable
+    const payload = {
+      "fields": {
+        "Date": data.date,
+        "TrackingCode": data.trackingCode,
+        "CustomerName": data.name,
+        "Phone": data.phone,
+        "Address": data.address,
+        "PostalCode": data.postalCode,
+        "Items": data.items || '',
+        "Total": data.total || '',
+        "Status": data.status || 'Pending',
+        "Notes": data.notes || ''
       }
-    }
+    };
 
-    const cartJSON = JSON.stringify(cart);
-    const raw = JSON.stringify(body);
+    // ارسال به Airtable
+    const options = {
+      method: "post",
+      contentType: "application/json",
+      headers: { Authorization: "Bearer " + AIRTABLE_API_KEY },
+      payload: JSON.stringify(payload)
+    };
 
-    if(rowIndex === -1){
-      // append
-      sh.appendRow([tracking, timestamp, isFinal ? 'TRUE' : 'FALSE', form.fullname||'', form.mobile||'', form.address||'', form.postal||'', form.note||'', cartJSON, raw]);
-    } else {
-      // update existing row (نگهداری شماره پیگیری قبلی)
-      sh.getRange(rowIndex,2).setValue(timestamp);
-      sh.getRange(rowIndex,3).setValue(isFinal ? 'TRUE' : 'FALSE');
-      sh.getRange(rowIndex,4).setValue(form.fullname||'');
-      sh.getRange(rowIndex,5).setValue(form.mobile||'');
-      sh.getRange(rowIndex,6).setValue(form.address||'');
-      sh.getRange(rowIndex,7).setValue(form.postal||'');
-      sh.getRange(rowIndex,8).setValue(form.note||'');
-      sh.getRange(rowIndex,9).setValue(cartJSON);
-      sh.getRange(rowIndex,10).setValue(raw);
-    }
+    const url = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${AIRTABLE_TABLE_NAME}`;
+    const response = UrlFetchApp.fetch(url, options);
 
-    return ContentService.createTextOutput(JSON.stringify({success:true})).setMimeType(ContentService.MimeType.JSON);
-  }catch(err){
-    return ContentService.createTextOutput(JSON.stringify({success:false, error: String(err)})).setMimeType(ContentService.MimeType.JSON);
+    return ContentService.createTextOutput(response.getContentText())
+      .setMimeType(ContentService.MimeType.JSON);
+
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({ error: err.message }))
+      .setMimeType(ContentService.MimeType.JSON);
   }
 }
